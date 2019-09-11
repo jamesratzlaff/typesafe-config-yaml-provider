@@ -6,11 +6,25 @@
 	<artifactId>typesafe-config-yaml-provider</artifactId>
 	<version>2019.09.10</version>
 	<name>Typesafe Config Yaml provider</name>
+	<description>A ConfigProvider implementation that allows use of yaml files with typesafe config</description>
+	<url>https://github.com/jamesratzlaff/typesafe-config-yaml-provider</url>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.release>8</maven.compiler.release>
 	</properties>
+	<developers>
+		<developer>
+			<name>James Ratzlaff</name>
+			<email>jamesratzlaff@gmail.com</email>
+			<url>https://github.com/jamesratzlaff</url>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:git://github.com/jamesratzlaff//typesafe-config-yaml-provider.git</connection>
+		<developerConnection>scm:git:ssh://github.com:jamesratzlaff//typesafe-config-yaml-provider.git</developerConnection>
+		<url>http://github.com/jamesratzlaff//typesafe-config-yaml-provider/tree/master</url>
+	</scm>
 	<dependencies>
 		<dependency>
 			<groupId>com.typesafe</groupId>
@@ -30,4 +44,56 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
