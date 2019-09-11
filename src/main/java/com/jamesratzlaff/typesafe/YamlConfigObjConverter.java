@@ -57,9 +57,7 @@ public class YamlConfigObjConverter {
 		return StreamSupport.stream(nodes.spliterator(), false).noneMatch(node->commentIsInScalarNode(comment, node));
 	}
 	
-	private static boolean commentIsNotInScalarNode(Comment comment, ScalarNode node) {
-		return !commentIsInScalarNode(comment, node);
-	}
+	
 	private static boolean commentIsInScalarNode(Comment comment, ScalarNode node) {
 		Mark start = node.getStartMark();
 		Mark end = node.getEndMark();
