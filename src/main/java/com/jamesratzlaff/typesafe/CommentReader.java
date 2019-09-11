@@ -59,6 +59,10 @@ public class CommentReader {
 					new ArrayList<String>(commentLines));
 		}
 
+		public int getEndLine() {
+			return this.lineNo+numberOfLinesIncludingBlanks;
+		}
+		
 		@Override
 		public int hashCode() {
 			return Objects.hash(charOffsetOfProceedingNonWhiteSpaceChar, commentLines, firstCommentTagCharOffset,

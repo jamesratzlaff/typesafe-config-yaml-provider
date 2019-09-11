@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
 
+import org.w3c.dom.Node;
 import org.yaml.snakeyaml.Yaml;
 
 import com.typesafe.config.ConfigFormat;
@@ -34,5 +35,7 @@ public class YamlConfigProvider extends AbstractConfigProvider {
 		ConfigObject co = ConfigValueFactory.fromMap((Map<String,Object>) obj);
 		return co;
 	}
+	
+	
 
 }
