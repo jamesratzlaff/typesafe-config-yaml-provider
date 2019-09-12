@@ -39,6 +39,17 @@ public class SubstitutableValue implements CharSequence, Serializable, Cloneable
 		this.value=value;
 	}
 	
+	public boolean isPlaceholder() {
+		return this.isPlaceholder;
+	}
+	
+	public boolean isOptional() {
+		return this.isOptional;
+	}
+	
+	public CharSequence getValue() {
+		return this.value;
+	}
 	
 	@Override
 	public int length() {

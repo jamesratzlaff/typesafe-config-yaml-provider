@@ -28,6 +28,8 @@ public class SubstitutableValues implements List<SubstitutableValue>, CharSequen
 		this(TokenUtils.getJoinableTokens(value));
 	}
 
+	
+	
 	public SubstitutableValues(List<? extends CharSequence> values) {
 		if (values == null) {
 			values = Collections.emptyList();

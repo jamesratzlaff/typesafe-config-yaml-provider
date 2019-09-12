@@ -3,12 +3,16 @@ package com.jamesratzlaff.typesafe;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -17,10 +21,21 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.IntPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.Mark;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.reader.UnicodeReader;
 
 public class CommentReader {
 
@@ -37,10 +52,11 @@ public class CommentReader {
 		private final BitSet innerBlankLines;
 		private final int numberOfLinesIncludingBlanks;
 		private final int charOffsetOfProceedingNonWhiteSpaceChar;
+		private final boolean inline;
 
 		public Comment(URL resource, int lineNo, int firstCommentTagCharOffset, BitSet innerBlankLines,
 				int numberOfLinesIncludingBlanks, int charOffsetOfProceedingNonWhiteSpaceChar,
-				List<String> commentLines) {
+				List<String> commentLines, boolean inline) {
 			if (commentLines == null) {
 				commentLines = new ArrayList<String>(0);
 			}
@@ -51,18 +67,19 @@ public class CommentReader {
 			this.numberOfLinesIncludingBlanks = numberOfLinesIncludingBlanks;
 			this.charOffsetOfProceedingNonWhiteSpaceChar = charOffsetOfProceedingNonWhiteSpaceChar;
 			this.commentLines = Collections.unmodifiableList(commentLines);
+			this.inline=inline;
 		}
 
 		public Comment copy() {
 			return new Comment(resource, lineNo, firstCommentTagCharOffset, innerBlankLines,
 					numberOfLinesIncludingBlanks, charOffsetOfProceedingNonWhiteSpaceChar,
-					new ArrayList<String>(commentLines));
+					new ArrayList<String>(commentLines), inline);
 		}
 
 		public int getEndLine() {
-			return this.lineNo+numberOfLinesIncludingBlanks;
+			return this.lineNo + numberOfLinesIncludingBlanks;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return Objects.hash(charOffsetOfProceedingNonWhiteSpaceChar, commentLines, firstCommentTagCharOffset,
@@ -94,6 +111,86 @@ public class CommentReader {
 			}
 			return cl;
 		}
+		
+		public boolean isBlankLine(int fileLine) {
+			return this.innerBlankLines.get(getCommentObjectLineNo(fileLine));
+		}
+		
+		public String getLine(int fileLineNo) {
+			int myLine = getCommentObjectLineNo(fileLineNo);
+			return getMyLine(myLine);
+		}
+		
+		private String getMyLine(int myLine) {
+			if(myLine>=this.getNumberOfLinesIncludingBlanks()) {
+				return null;
+			}
+			int commentLine = getCommentLinesIndex(myLine);
+			if(commentLine>-1) {
+				return commentLines.get(commentLine);
+			} else {
+				return "";
+			}
+		}
+		
+		public List<String> getLines(){
+			List<String> strs = new ArrayList<String>(this.getNumberOfLinesIncludingBlanks());
+			for(int i=0;i<this.getNumberOfLinesIncludingBlanks();i++) {
+				strs.add(getMyLine(i));
+			}
+			return strs;
+		}
+		
+		private int getCommentLinesIndex(int myLine) {
+			int commentLine=-1;
+			for(int i=0;i<myLine+1;i++) {
+				if(!this.innerBlankLines.get(i)) {
+					commentLine+=1;
+				}
+			}
+			if(this.innerBlankLines.get(myLine)) {
+				return -1;
+			}
+			return commentLine;
+		}
+		
+		private int getCommentObjectLineNo(int fileLine) {
+			return fileLine-this.lineNo;
+		}
+
+//		private int getNextCommentStartAfter(int fileLine, int index) {
+//			if(this.commentLines.isEmpty()) {
+//				return -1;
+//			}
+//			if()
+//			int nextCommentChar = !this.commentLines.isEmpty() ? this.commentLines.get(0).indexOf('#', index) : -1;
+//			if (nextCommentChar > -1) {
+//				nextCommentChar += firstCommentTagCharOffset;
+//			}
+//			return nextCommentChar;
+//		}
+//
+//		/**
+//		 * 
+//		 * @param index - the char index of the line that this exists in
+//		 * @return {@code null} if there isn't a comment tage after the given
+//		 *         {@code index}, otherwise a new instance of a {@link Comment} other
+//		 *         than {@link #getFirstCommentTagCharOffset()} and the first line of
+//		 *         the comment lines, it will have all the same values as this instance
+//		 */
+//		public Comment withCommentTagAfterIndex(int index) {
+//			int nextCommentTag = getNextCommentStartAfter(index);
+//			Comment newInst = null;
+//			if(nextCommentTag>-1) {
+//				List<String> commentsToUse = new ArrayList<String>(this.commentLines.size());
+//				commentsToUse.add(this.commentLines.get(0).substring(nextCommentTag-firstCommentTagCharOffset));
+//				if(this.commentLines.size()>1) {
+//					commentsToUse.addAll(this.commentLines.subList(1, this.commentLines.size()));
+//				}
+//				return new Comment(resource, lineNo, nextCommentTag, innerBlankLines, index, nextCommentTag, commentsToUse)
+//			}
+//			return newInst;
+//		}
 
 		/**
 		 * @return the resource
@@ -159,10 +256,56 @@ public class CommentReader {
 
 		@Override
 		public String toString() {
-			return "Comment [resource=" + resource + ", lineNo=" + lineNo + ", firstCommentTagCharOffset="
-					+ firstCommentTagCharOffset + ", commentLines=" + commentLines + ", innerBlankLines="
-					+ innerBlankLines + ", numberOfLinesIncludingBlanks=" + numberOfLinesIncludingBlanks
-					+ ", charOffsetOfProceedingNonWhiteSpaceChar=" + charOffsetOfProceedingNonWhiteSpaceChar + "]";
+			StringBuilder builder = new StringBuilder();
+			builder.append("Comment [resource=");
+			builder.append(resource);
+			builder.append(", lineNo=");
+			builder.append(lineNo);
+			builder.append(", firstCommentTagCharOffset=");
+			builder.append(firstCommentTagCharOffset);
+			builder.append(", commentLines=");
+			builder.append(commentLines);
+			builder.append(", innerBlankLines=");
+			builder.append(innerBlankLines);
+			builder.append(", numberOfLinesIncludingBlanks=");
+			builder.append(numberOfLinesIncludingBlanks);
+			builder.append(", charOffsetOfProceedingNonWhiteSpaceChar=");
+			builder.append(charOffsetOfProceedingNonWhiteSpaceChar);
+			builder.append("]");
+			return builder.toString();
+		}
+
+		private static String prefixString(String prefix, String toPrefix) {
+			StringBuilder sb = new StringBuilder();
+			int octothorpIndex = toPrefix.indexOf('#');
+			if (octothorpIndex > -1) {
+				while (toPrefix.codePointAt(octothorpIndex) == "#".codePointAt(0)) {
+					octothorpIndex += 1;
+				}
+			} else {
+				octothorpIndex = 0;
+			}
+			Charset codePointCharSet = Charset.forName("UTF-32");
+			String toPrefixPrefix = toPrefix.substring(0, octothorpIndex);
+			toPrefix = toPrefix.substring(octothorpIndex);
+			try {
+
+				CharsetDecoder decoder = codePointCharSet.newDecoder();
+				CharBuffer cb = decoder.decode(ByteBuffer.wrap(toPrefix.getBytes(codePointCharSet)));
+
+				System.out.println(new String("\t##".getBytes()) + cb);
+			} catch (CharacterCodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			List<Integer> asInts = new ArrayList<Integer>();
+			toPrefixPrefix.codePoints().forEach(asInts::add);
+			prefix.codePoints().forEach(asInts::add);
+			toPrefix.codePoints().forEach(asInts::add);
+			System.out.println(asInts);
+			asInts.stream().mapToInt(Integer::intValue).forEach(codePoint -> sb.appendCodePoint(codePoint));
+
+			return sb.toString();
 		}
 
 	}
@@ -185,12 +328,24 @@ public class CommentReader {
 		}
 
 	}
-
-	public static List<Comment> readComments(URL url) {
+	
+	public static List<Comment> readComment(URL url, List<Node> nodes){
+		List<ScalarNode> toUse = Collections.emptyList();
+		if(nodes==null) {
+			if(url!=null) {
+				toUse = new ArrayList<ScalarNode>();
+				nodes = YamlConfigObjConverter.getRootNodes(url);
+				for(int i=0;i<nodes.size();i++) {
+					Node current = nodes.get(i);
+					getScalarNodes(toUse, current);
+				}
+			}
+		}
+		List<ScalarNode> scalarNodes = toUse;
 		List<CommentTracker> commentsTrackers = Collections.emptyList();
 		if (url != null) {
 			try (Stream<String> lines = lines(url)) {
-				commentsTrackers = readComments(lines.iterator());
+				commentsTrackers = readComments(lines.iterator(),scalarNodes);
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
@@ -200,13 +355,39 @@ public class CommentReader {
 		return cmnts;
 	}
 
-	private static List<CommentTracker> readComments(Iterator<String> iterator) {
+	public static List<Comment> readComments(URL url) {
+		return readComment(url, null);
+		
+	}
+
+	private static List<CommentTracker> readComments(Iterator<String> iterator,List<ScalarNode> scalarNodes) {
 		int lineNo = 0;
 		CommentTracker commentTracker = new CommentTracker();
 		ArrayList<CommentTracker> commentTrackers = new ArrayList<CommentTracker>();
 		while (iterator.hasNext()) {
 			String line = iterator.next();
-			boolean completed = commentTracker.process(line, lineNo);
+			boolean completed =false;
+			if(commentTracker.getCommentLines().size()==1&&commentTracker.getFirstCommentLineNo()!=-1&&commentTracker.isInline()) {
+				if(!line.isBlank()&&!COMMENT_CONTINUED.matcher(line).matches()) {
+					for(int i=0;i<line.length();i++) {
+						int currentChar=line.charAt(i);
+						if(!Character.isWhitespace(currentChar)) {
+							commentTracker.nonCommentCharOffset=i;
+							break;
+						}
+					}
+					completed=true;
+					if(completed) {
+						commentTrackers.add(commentTracker);
+						commentTracker = new CommentTracker();
+						completed=false;
+					}
+				}
+			}
+			if(!completed) {
+				completed = commentTracker.process(line, lineNo,scalarNodes);
+			}
+			
 			if (completed) {
 				commentTrackers.add(commentTracker);
 				commentTracker = new CommentTracker();
@@ -224,7 +405,7 @@ public class CommentReader {
 	}
 
 	private static Stream<String> lines(InputStream is) {
-		return is != null ? lines(new InputStreamReader(is)) : Stream.empty();
+		return is != null ? lines(new UnicodeReader(is)) : Stream.empty();
 	}
 
 	private static Stream<String> lines(Reader r) {
@@ -236,6 +417,7 @@ public class CommentReader {
 	}
 
 	static class CommentTracker {
+		private boolean inline=false;
 		private int firstCommentLineNo = -1;
 		private int firstCommentTagOffset = -1;
 		private BitSet innerBlankLines = new BitSet();
@@ -249,7 +431,7 @@ public class CommentReader {
 
 		public Comment toComment(URL resource) {
 			return new Comment(resource, getFirstCommentLineNo(), getFirstCommentTagOffset(), getInnerBlankLines(),
-					getInnerLineIndex() + 1, getNonCommentCharOffset(), getCommentLines());
+					getInnerLineIndex() + 1, getNonCommentCharOffset(), getCommentLines(),isInline());
 		}
 
 		/**
@@ -265,15 +447,64 @@ public class CommentReader {
 		public void setInnerLineIndex(int innerLineIndex) {
 			this.innerLineIndex = innerLineIndex;
 		}
-
+		private static boolean commentIsNotInScalarNode(Comment comment, Iterable<ScalarNode> nodes) {
+			return StreamSupport.stream(nodes.spliterator(), false).noneMatch(node->commentIsInScalarNode(comment, node));
+		}
+		
+		
+		private static boolean commentIsInScalarNode(Comment comment, ScalarNode node) {
+			Mark start = node.getStartMark();
+			Mark end = node.getEndMark();
+			int startLine = start.getLine();
+			int endLine = end.getLine();
+			int startColumn=start.getColumn();
+			int endColumn=end.getColumn();
+			return ((comment.getLineNo()>startLine||(comment.getLineNo()==startLine&&comment.getFirstCommentTagCharOffset()>=startColumn))&&
+					(comment.getEndLine()<endLine||(comment.getEndLine()+1==endLine&&comment.getCharOffsetOfProceedingNonWhiteSpaceChar()<=endColumn)));
+		}
+		
+		
+		public static final Comparator<Mark> markComparator = Comparator.nullsLast(Comparator.comparingInt(Mark::getLine)).thenComparing(Mark::getIndex);
+		private static final Comparator<ScalarNode> scalarNodeComparator = Comparator.nullsLast(Comparator.comparing(ScalarNode::getStartMark, markComparator));
+		private static boolean ScalarNodeContains(ScalarNode node, int line, int offset) {
+			Mark start = node.getStartMark();
+			Mark end = node.getEndMark();
+			int startLine = start.getLine();
+			int endLine = end.getLine();
+			int startColumn=start.getColumn();
+			int endColumn=end.getColumn();
+			return ((line>startLine||(line==startLine&&offset>=startColumn))&&
+					(line<endLine||(line==endLine&&offset<endColumn)));
+		}
+		
+		private static List<ScalarNode> getScalarNodesInLineNumber(int line, List<ScalarNode> nodes) {
+			return nodes.stream().filter(node->node.getStartMark().getLine()<=line&&node.getEndMark().getLine()>=line).sorted(scalarNodeComparator).collect(Collectors.toList());
+		}
+		private static ScalarNode getScalarNodeInLineNumber(int line, List<ScalarNode> nodes) {
+			List<ScalarNode> foundNodes = getScalarNodesInLineNumber(line, nodes);
+			if(!foundNodes.isEmpty()) {
+				return foundNodes.get(foundNodes.size()-1);
+			}
+			return null;
+		}
+		
 		/**
 		 * 
 		 * @param line
 		 * @param lineNo
 		 * @return {@code true} if this is done processing
 		 */
-		public boolean process(String line, int lineNo) {
+		public boolean process(String line, int lineNo, List<ScalarNode> scalarNodes) {
+			if(line.contains("server-addr")) {
+				System.out.println("hmm");
+			}
 			boolean truth = false;
+			ScalarNode containingNode = firstCommentLineNo==-1?getScalarNodeInLineNumber(lineNo, scalarNodes):null;
+			if(containingNode!=null) {
+				if(lineNo<containingNode.getEndMark().getLine()) {
+					return false;
+				}
+			}
 			if (line.isBlank()) {
 				if (firstCommentLineNo != -1) {
 					innerBlankLines.set(innerLineIndex, true);
@@ -281,14 +512,26 @@ public class CommentReader {
 			} else {
 				Pattern toUse = firstCommentLineNo == -1 ? COMMENT : COMMENT_CONTINUED;
 				Matcher m = toUse.matcher(line);
+				if(containingNode!=null) {
+					if(containingNode.getEndMark().getLine()==lineNo) {
+						int endMarkCol = containingNode.getEndMark().getColumn();
+						try {
+						m=m.region(endMarkCol, line.length());
+						}catch(IndexOutOfBoundsException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				if (m.matches()) {
 					if (firstCommentLineNo == -1) {
+						this.innerLineIndex = 0;
 						String nonCommentData = m.group(1);
 						String commentData = m.group(2);
+						firstCommentTagOffset = m.start(2);
 						firstCommentLineNo = lineNo;
-						firstCommentTagOffset = nonCommentData.length();
+						isInline(line);
 						this.commentLines.add(commentData);
-						this.innerLineIndex = 0;
+						
 					} else {
 						String commentData = m.group(1);
 						this.commentLines.add(commentData);
@@ -306,6 +549,18 @@ public class CommentReader {
 				innerLineIndex += 1;
 			}
 			return truth;
+		}
+		private static final IntPredicate isWhiteSpace = Character::isWhitespace;
+		private static final IntPredicate isNotWhiteSpace=isWhiteSpace.negate();
+		private boolean isInline(String line) {
+			if(this.innerLineIndex==0) {
+				this.inline=line.codePoints().limit(this.firstCommentTagOffset).anyMatch(isNotWhiteSpace);
+			}
+			return this.inline;
+		}
+		
+		public boolean isInline() {
+			return this.inline;
 		}
 
 		/**
@@ -387,6 +642,50 @@ public class CommentReader {
 			this.commentLines = new ArrayList<String>();
 		}
 
+	}
+	
+	
+	
+	
+	
+	static List<ScalarNode> getScalarNodes(Node node){
+		if(node==null) {
+			return Collections.emptyList();
+		}
+		return getScalarNodes(new ArrayList<ScalarNode>(), node);
+	}
+	
+	static List<ScalarNode> getScalarNodes(List<ScalarNode> result, Node node){
+		if(result==null) {
+			result=new ArrayList<ScalarNode>();
+		}
+		if(node==null) {
+			return Collections.emptyList();
+		}
+		if(node instanceof MappingNode) {
+			MappingNode asMappingNode = (MappingNode)node;
+			List<NodeTuple> kvps = asMappingNode.getValue();
+			for(int i=0;i<kvps.size();i++) {
+				getScalarNodes(result,kvps.get(i));
+			}
+		} else if(node instanceof SequenceNode) {
+		SequenceNode asSequenceNode = (SequenceNode)node;
+			List<Node> nodes = asSequenceNode.getValue();
+			for(int i=0;i<nodes.size();i++) {
+				getScalarNodes(result, nodes.get(i));
+			}
+		}else if(node instanceof ScalarNode) {
+			result.add((ScalarNode)node);
+		}
+		return result;
+	}
+	static List<ScalarNode> getScalarNodes(List<ScalarNode> result, NodeTuple tuple){
+		if(result==null) {
+			result=new ArrayList<ScalarNode>();
+		}
+		getScalarNodes(result, tuple!=null?tuple.getKeyNode():null);
+		getScalarNodes(result, tuple!=null?tuple.getValueNode():null);
+		return result;
 	}
 
 }
