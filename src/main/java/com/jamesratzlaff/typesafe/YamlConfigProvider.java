@@ -2,20 +2,12 @@ package com.jamesratzlaff.typesafe;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
 
-import org.yaml.snakeyaml.Yaml;
-
-import com.jamesratzlaff.typesafe.CommentReader.Comment;
 import com.typesafe.config.ConfigFormat;
 import com.typesafe.config.ConfigIncludeContext;
-import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueFactory;
 import com.typesafe.config.impl.AbstractConfigProvider;
 import com.typesafe.config.impl.SimpleConfigFormat;
 
@@ -29,13 +21,8 @@ public class YamlConfigProvider extends AbstractConfigProvider {
 
 	public ConfigValue rawParseValue(Reader reader, ConfigOrigin origin, ConfigParseOptions finalOptions,
 			ConfigIncludeContext includeContext) throws IOException {
-		Yaml yaml = new Yaml();
-		Iterable<Object> obj = yaml.loadAll(reader);
-		System.out.println(origin);
-		
-		System.out.println(YAML.acceptContent());
-		ConfigObject co = ConfigValueFactory.fromMap((Map<String,Object>) obj);
-		return co;
+		YamlConfigObjConverter converter = new YamlConfigObjConverter(origin, includeContext, reader);
+		return converter.getConfValue();
 	}
 	
 	

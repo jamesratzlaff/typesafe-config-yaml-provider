@@ -329,7 +329,7 @@ public class CommentReader {
 
 	}
 	
-	public static List<Comment> readComment(URL url, List<Node> nodes){
+	public static List<Comment> readComments(URL url, List<Node> nodes){
 		List<ScalarNode> toUse = Collections.emptyList();
 		if(nodes==null) {
 			if(url!=null) {
@@ -356,7 +356,7 @@ public class CommentReader {
 	}
 
 	public static List<Comment> readComments(URL url) {
-		return readComment(url, null);
+		return readComments(url, null);
 		
 	}
 
