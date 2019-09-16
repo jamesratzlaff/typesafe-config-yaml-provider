@@ -7,6 +7,7 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import com.jamesratzlaff.yaml.spi.TagProcessor;
+import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 
 public class TagProcessorService {
@@ -53,9 +54,9 @@ public class TagProcessorService {
 	}
 	
 	
-	public ConfigValue getConfigValue(Node n) {
+	public ConfigValue getConfigValue(ConfigOrigin origin, Node n) {
 		TagProcessor tp = getTagProcessor(n);
-		return tp.apply(n);
+		return tp.apply(origin, n);
 	}
 	
 	

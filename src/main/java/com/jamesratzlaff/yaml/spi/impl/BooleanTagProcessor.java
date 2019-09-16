@@ -2,6 +2,7 @@ package com.jamesratzlaff.yaml.spi.impl;
 
 import org.yaml.snakeyaml.nodes.Tag;
 
+import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 import com.typesafe.config.ConfigValueFactory;
 
@@ -12,7 +13,7 @@ public class BooleanTagProcessor extends AbstractTagProcessor{
 	}
 	
 	@Override
-	public ConfigValue apply(String val) {
+	public ConfigValue apply(ConfigOrigin origin, String val) {
 		boolean booleanVal = Boolean.parseBoolean(val);
 		return ConfigValueFactory.fromAnyRef(booleanVal);
 	}

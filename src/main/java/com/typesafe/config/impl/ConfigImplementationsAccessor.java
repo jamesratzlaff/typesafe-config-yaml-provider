@@ -28,7 +28,10 @@ public class ConfigImplementationsAccessor {
 				ConfigReference cr = new ConfigReference(origin, expr);
 				result = cr;
 			} else {
-				result = ConfigValueFactory.fromAnyRef(value != null ? value.toString() : null).withOrigin(origin);
+				result = ConfigValueFactory.fromAnyRef(value != null ? value.toString() : null);
+				if(origin!=null) {
+					result=result.withOrigin(origin);
+				}
 			}
 		}
 		return result;

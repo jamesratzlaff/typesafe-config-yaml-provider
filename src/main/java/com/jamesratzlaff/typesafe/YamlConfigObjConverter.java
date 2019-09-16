@@ -298,7 +298,7 @@ public class YamlConfigObjConverter {
 	}
 
 	protected ConfigValue convert(ScalarNode node) {
-		return TagProcessorService.getInstance().getConfigValue(node);
+		return TagProcessorService.getInstance().getConfigValue(this.configOrigin,node);
 	}
 
 	public static List<Node> getRootNodes(URL url) {

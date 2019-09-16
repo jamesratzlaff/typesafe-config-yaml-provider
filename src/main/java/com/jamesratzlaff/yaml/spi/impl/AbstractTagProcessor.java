@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import com.jamesratzlaff.yaml.spi.TagProcessor;
+import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 import com.typesafe.config.ConfigValueFactory;
 
@@ -67,8 +68,9 @@ public class AbstractTagProcessor implements TagProcessor{
 			return getCompatibleTagsPredicate().test(t);
 		}
 	}
+	
 	@Override
-	public ConfigValue apply(String strValue) {
+	public ConfigValue apply(ConfigOrigin origin, String strValue) {
 		return ConfigValueFactory.fromAnyRef(strValue);
 	}
 	protected Predicate<Tag> getCompatibleTagsPredicate(){
