@@ -11,6 +11,8 @@ import java.util.stream.StreamSupport;
 
 import com.jamesratzlaff.util.SubstitutableValue;
 import com.jamesratzlaff.util.SubstitutableValues;
+import com.typesafe.config.ConfigIncludeContext;
+import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 import com.typesafe.config.ConfigValueFactory;
@@ -75,8 +77,11 @@ public class ConfigImplementationsAccessor {
 			ConfigConcatenation concat = toConfigConcat(origin, asList);
 			toReturn=concat;
 		}
-		
 		return toReturn;
+	}
+	
+	public static ConfigObject include(ConfigIncludeContext includeContext, String name) {
+		return new SimpleIncluder(null).include(includeContext, name);
 	}
 	
 	

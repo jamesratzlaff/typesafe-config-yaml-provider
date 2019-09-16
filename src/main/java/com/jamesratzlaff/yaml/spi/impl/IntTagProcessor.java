@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 import org.yaml.snakeyaml.nodes.Tag;
 
+import com.typesafe.config.ConfigIncludeContext;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 import com.typesafe.config.ConfigValueFactory;
@@ -20,7 +21,7 @@ public class IntTagProcessor extends AbstractTagProcessor{
 	}
 
 	@Override
-	public ConfigValue apply(ConfigOrigin origin, String strValue) {
+	public ConfigValue apply(ConfigOrigin origin, String strValue, ConfigIncludeContext includeContext) {
 		BigInteger intVal = new BigInteger(strValue);
 		if(intVal.compareTo(MAX_INT)<=0&&intVal.compareTo(MIN_INT)>=0) {
 			return ConfigValueFactory.fromAnyRef(intVal.intValue());

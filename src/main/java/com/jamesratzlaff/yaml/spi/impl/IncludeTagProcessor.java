@@ -1,21 +1,19 @@
 package com.jamesratzlaff.yaml.spi.impl;
 
-import org.yaml.snakeyaml.nodes.Tag;
-
 import com.typesafe.config.ConfigIncludeContext;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueFactory;
+import com.typesafe.config.impl.ConfigImplementationsAccessor;
 
-public class NullTagProcessor extends AbstractTagProcessor{
+public class IncludeTagProcessor extends AbstractTagProcessor{
 
-	public NullTagProcessor() {
-		super(Tag.NULL);
+	public IncludeTagProcessor() {
+		super("!include");
 	}
 
 	@Override
 	public ConfigValue apply(ConfigOrigin origin, String strValue, ConfigIncludeContext includeContext) {
-		return ConfigValueFactory.fromAnyRef(null);
+		return ConfigImplementationsAccessor.include(includeContext, strValue);
 	}
-
+	
 }

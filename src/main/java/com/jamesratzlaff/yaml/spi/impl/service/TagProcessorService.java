@@ -8,6 +8,8 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import com.jamesratzlaff.yaml.spi.TagProcessor;
+import com.typesafe.config.ConfigIncludeContext;
+import com.typesafe.config.ConfigIncluder;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 import com.typesafe.config.ConfigValueFactory;
@@ -56,13 +58,14 @@ public class TagProcessorService {
 	}
 	
 	
-	public ConfigValue getConfigValue(ConfigOrigin origin, Node n) {
+	public ConfigValue getConfigValue(ConfigOrigin origin, Node n, ConfigIncludeContext includer) {
 		if(n==null) {
 			return ConfigValueFactory.fromAnyRef(null);
 		}
 		TagProcessor tp = getTagProcessor(n);
+		
 		if(tp!=null) {
-			return tp.apply(origin, n);
+			return tp.apply(origin, n,includer);
 		} else if(n instanceof ScalarNode) {
 			System.out.println("unknown tag "+n.getTag());
 			return ConfigValueFactory.fromAnyRef(((ScalarNode)n).getValue());

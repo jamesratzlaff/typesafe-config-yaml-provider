@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.yaml.snakeyaml.nodes.Tag;
 
+import com.typesafe.config.ConfigIncludeContext;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
 import com.typesafe.config.ConfigValueFactory;
@@ -18,8 +19,8 @@ public class FloatTagProcessor extends AbstractTagProcessor{
 		super(Tag.FLOAT);
 	}
 	
-	
-	public ConfigValue apply(ConfigOrigin origin, String value) {
+	@Override
+	public ConfigValue apply(ConfigOrigin origin, String value, ConfigIncludeContext includeContext) {
 		BigDecimal floatVal = new BigDecimal(value);
 		return ConfigValueFactory.fromAnyRef(floatVal);
 	}

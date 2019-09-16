@@ -3,3 +3,4 @@ com.jamesratzlaff.yaml.spi.impl.FloatTagProcessor
 com.jamesratzlaff.yaml.spi.impl.IntTagProcessor
 com.jamesratzlaff.yaml.spi.impl.NullTagProcessor
 com.jamesratzlaff.yaml.spi.impl.StringTagProcessor
+com.jamesratzlaff.yaml.spi.impl.IncludeTagProcessor
