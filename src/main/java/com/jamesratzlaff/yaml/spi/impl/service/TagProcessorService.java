@@ -4,11 +4,13 @@ import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 
 import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import com.jamesratzlaff.yaml.spi.TagProcessor;
 import com.typesafe.config.ConfigOrigin;
 import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueFactory;
 
 public class TagProcessorService {
 	private static final TagProcessorService INSTANCE;
@@ -55,8 +57,17 @@ public class TagProcessorService {
 	
 	
 	public ConfigValue getConfigValue(ConfigOrigin origin, Node n) {
+		if(n==null) {
+			return ConfigValueFactory.fromAnyRef(null);
+		}
 		TagProcessor tp = getTagProcessor(n);
-		return tp.apply(origin, n);
+		if(tp!=null) {
+			return tp.apply(origin, n);
+		} else if(n instanceof ScalarNode) {
+			System.out.println("unknown tag "+n.getTag());
+			return ConfigValueFactory.fromAnyRef(((ScalarNode)n).getValue());
+		}
+		return null;
 	}
 	
 	
