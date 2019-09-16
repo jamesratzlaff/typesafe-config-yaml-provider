@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -37,6 +36,12 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 
+/**
+ * Aggregates comment data for use with attaching it so some configuration item (since snakeyaml ignores comments).
+ * @author jamesratzlaff
+ * 
+ *
+ */
 public class CommentReader {
 
 	private static final Pattern COMMENT = Pattern.compile("^([^#]*)#(.*)\\s*$");
@@ -68,6 +73,24 @@ public class CommentReader {
 			this.charOffsetOfProceedingNonWhiteSpaceChar = charOffsetOfProceedingNonWhiteSpaceChar;
 			this.commentLines = Collections.unmodifiableList(commentLines);
 			this.inline=inline;
+		}
+		
+		public int getLineOfFirstNonWhiteSpaceChar() {
+			return lineNo+numberOfLinesIncludingBlanks+1;
+		}
+
+		/**
+		 * @return the innerBlankLines
+		 */
+		public BitSet getInnerBlankLines() {
+			return innerBlankLines;
+		}
+
+		/**
+		 * @return the inline
+		 */
+		public boolean isInline() {
+			return inline;
 		}
 
 		public Comment copy() {
@@ -125,18 +148,21 @@ public class CommentReader {
 			if(myLine>=this.getNumberOfLinesIncludingBlanks()) {
 				return null;
 			}
-			int commentLine = getCommentLinesIndex(myLine);
+			int commentLine = getCommentLinesIndex(myLine)-1;
 			if(commentLine>-1) {
 				return commentLines.get(commentLine);
 			} else {
-				return "";
+				return null;
 			}
 		}
 		
 		public List<String> getLines(){
 			List<String> strs = new ArrayList<String>(this.getNumberOfLinesIncludingBlanks());
 			for(int i=0;i<this.getNumberOfLinesIncludingBlanks();i++) {
-				strs.add(getMyLine(i));
+				String myLine = getMyLine(i);
+				if(myLine!=null) {
+					strs.add(myLine);
+				}
 			}
 			return strs;
 		}
