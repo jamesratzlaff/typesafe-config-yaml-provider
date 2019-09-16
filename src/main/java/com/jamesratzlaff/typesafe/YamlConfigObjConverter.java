@@ -26,6 +26,7 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 
 import com.jamesratzlaff.typesafe.CommentReader.Comment;
+import com.jamesratzlaff.yaml.spi.impl.service.TagProcessorService;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigIncludeContext;
 import com.typesafe.config.ConfigList;
@@ -194,7 +195,7 @@ public class YamlConfigObjConverter {
 				if(!normalized.containsKey(key)) {
 					normalized.put(key, associatedList);
 				}
-				associatedList.add(index, (ConfigValue)value);
+				associatedList.set(index, (ConfigValue)value);
 			} else {
 				normalized.put(key, value);
 			}
@@ -297,8 +298,7 @@ public class YamlConfigObjConverter {
 	}
 
 	protected ConfigValue convert(ScalarNode node) {
-		Object value = node.getValue();
-		return ConfigValueFactory.fromAnyRef(value);
+		return TagProcessorService.getInstance().getConfigValue(node);
 	}
 
 	public static List<Node> getRootNodes(URL url) {
