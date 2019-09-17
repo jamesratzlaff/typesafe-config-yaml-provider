@@ -25,6 +25,12 @@
 		<developerConnection>scm:git:ssh://github.com:jamesratzlaff//typesafe-config-yaml-provider.git</developerConnection>
 		<url>http://github.com/jamesratzlaff//typesafe-config-yaml-provider/tree/master</url>
 	</scm>
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>https://apache.org/licenses/LICENSE-2.0.html</url>
+		</license>
+	</licenses>
 	<dependencies>
 		<dependency>
 			<groupId>com.typesafe</groupId>
