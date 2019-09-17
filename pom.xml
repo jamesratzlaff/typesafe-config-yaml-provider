@@ -6,7 +6,7 @@
 	<artifactId>typesafe-config-yaml-provider</artifactId>
 	<version>2019.09.16</version>
 	<name>Typesafe Config Yaml provider</name>
-	<description>A ConfigProvider implementation that allows use of yaml files with typesafe config</description>
+	<description>A ConfigProvider implementation that allows use of yaml files with typesafe config (POC version)</description>
 	<url>https://github.com/jamesratzlaff/typesafe-config-yaml-provider</url>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
