@@ -40,6 +40,9 @@ public class TokenUtils {
 	}
 	
 	public static List<CharSequence> getJoinableTokens(String cs) {
+		if("${_.0.spring.cloud.nacos.config.ext-bonfig.0.derf}".equals(cs)) {
+			System.out.println("whoop");
+		}
 		List<Range> ranges = Range.fillIn(Range.removeRangesContainedByOthers(getPlaceHolderRanges(cs)),cs.length());
 		return ranges.stream().map(range->range.subSequence(cs)).collect(Collectors.toList());
 	}
@@ -245,14 +248,16 @@ public class TokenUtils {
 						result.add(previous.breed(current));
 					}
 				}
+				
 				result.add(current);
 				previous=current;
 			}
 			int start=result.isEmpty()?0:result.get(result.size()-1).close+1;
 			int end=len-1;
-			if(start!=end) {
+			if(start<end) {
 				result.add(new Range(start,end));
 			}
+			
 			return result;
 			
 		}
@@ -330,8 +335,8 @@ public class TokenUtils {
 			CharSequence sub = null;
 			if (cs != null) {
 				int start = exclusive ? this.open + 1 : this.open;
-				int end = exclusive ? this.close : this.close + 1;
-				sub = cs.subSequence(start, end);
+				int end = exclusive ? this.close : this.close+1;
+				sub = cs.subSequence(start,end);
 			}
 			return sub;
 		}

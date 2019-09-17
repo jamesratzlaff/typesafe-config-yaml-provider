@@ -63,14 +63,8 @@ public class ConfigImplementationsAccessor {
 		ConfigValue toReturn = null;
 		if (sv != null && sv.size() == 1) {
 			SubstitutableValue val = sv.get(0);
-			if (!val.isPlaceholder()) {
-				ConfigValue cv = ConfigValueFactory.fromAnyRef(val.getValue().toString());
-				if (origin != null) {
-					cv = cv.withOrigin(origin);
-				}
-				toReturn = cv;
-			}
-
+			ConfigValue cv = toConfigReferenceOrStringValue(origin, val);
+			toReturn = cv;
 		}
 		if(toReturn==null) {
 			List<ConfigValue> asList = toConfigConcatenationValuesList(origin, sv);

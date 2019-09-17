@@ -56,8 +56,7 @@ public class YamlConfigObjConverter {
 	public YamlConfigObjConverter(ConfigOrigin configOrigin, ConfigIncludeContext includeContext, List<Node> rootNodes,
 			List<Comment> comments) {
 		this.configOrigin = configOrigin;
-		this.includeContext = includeContext;
-
+		this.includeContext =includeContext!=null?includeContext.setParseOptions(includeContext.parseOptions().setAllowMissing(true)):null;
 		List<Node> toUse = rootNodes == null ? configOrigin != null ? getRootNodes(configOrigin.url()) : null
 				: rootNodes;
 		this.rootNodes = toUse != null ? toUse : Collections.emptyList();

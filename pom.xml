@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jamesratzlaff</groupId>
 	<artifactId>typesafe-config-yaml-provider</artifactId>
-	<version>2019.09.10</version>
+	<version>2019.09.16</version>
 	<name>Typesafe Config Yaml provider</name>
 	<description>A ConfigProvider implementation that allows use of yaml files with typesafe config</description>
 	<url>https://github.com/jamesratzlaff/typesafe-config-yaml-provider</url>
