@@ -11,7 +11,7 @@ You can add it to your maven project by inclduing the dependency
   <version>2019.09.16</version>
 </dependency>
 ```
-For other build system go [here](https://search.maven.org/artifact/com.jamesratzlaff/typesafe-config-yaml-provider/2019.09.16/jar) to to get what you need to include this library
+For other build systems go [here](https://search.maven.org/artifact/com.jamesratzlaff/typesafe-config-yaml-provider/2019.09.16/jar) to to get what you need to include this library
 
 Including a file within your yml can be done by tagging the value of an item with !include
 
