@@ -1,10 +1,21 @@
 # typesafe-config-yaml-provider
-![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.jamesratzlaff/typesafe-config-yaml-provider)
 A ConfigProvider implementation that allows for yaml files to be used with the typesafe config library
 
 Simply include this library in your classpath if you are using the version of typesafe config that has the SPI feature and you should be able to load yml config files like you would any other config file.
 
+You can add it to your maven project by inclduing the dependency
+``` xml
+<dependency>
+  <groupId>com.jamesratzlaff</groupId>
+  <artifactId>typesafe-config-yaml-provider</artifactId>
+  <version>2019.09.16</version>
+</dependency>
+```
+For other build system go [here](https://search.maven.org/artifact/com.jamesratzlaff/typesafe-config-yaml-provider/2019.09.16/jar) to to get what you need to include this library
+
 Including a file within your yml can be done by tagging the value of an item with !include
+
+
 
 ## This libaray is currently in a POC stage
 This was developed to show the flexibility of the new SPI feature for typesafe config.  That said the code is not very pretty right now as well as javadoc and unit tests being pretty much non-existant. So throw some caution to the wind before you consider using this in a production environment.
