@@ -1,5 +1,7 @@
 package com.jamesratzlaff.typesafe;
 
+import static com.jamesratzlaff.typesafe.YAML_CONF.MULTI_DOC_KEY;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -113,7 +115,7 @@ public class YamlConfigObjConverter {
 				List<ConfigValue> configValues = rootNodes.stream().map(node -> (ConfigValue) convert(node))
 						.collect(Collectors.toList());
 				ConfigList asConfigList = ConfigValueFactory.fromIterable(configValues).withOrigin(getConfigOrigin());
-				this.confValue = ConfigFactory.empty().withValue("_", asConfigList).root();
+				this.confValue = ConfigFactory.empty().withValue(MULTI_DOC_KEY, asConfigList).root();
 			}
 		}
 		return confValue;
