@@ -7,11 +7,12 @@ Including a file within your yml can be done by tagging the value of an item wit
 
 ## This libaray is currently in a POC stage
 This was developed to show the flexibility of the new SPI feature for typesafe config.  That said the code is not very pretty right now as well as javadoc and unit tests being pretty much non-existant. So throw some caution to the wind before you consider using this in a production environment.
+______
 
-### Known limitations:
+### Known limitations
 Currently for a mulidoc-file things are a little wonky when it comes to using substitutions/placeholders to reference other values within the file. Also for multi-doc files, each stream with in the file is stored in a ConfigList with the key of "_"
 
-### Example
+### Multi-doc file example
 Let's say you have a multi-doc yaml file named 'hello.yml' similar to the following:
 
 ``` yaml
