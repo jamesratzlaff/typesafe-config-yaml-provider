@@ -5,7 +5,7 @@ Simply include this library in your classpath if you are running the version of 
 
 Including a file within your yml can be done by tagging the value of an item with !include
 
-##This libaray is currently in a POC stage
+## This libaray is currently in a POC stage
 This was developed to show the flexibility of the new SPI feature for typesafe config.  That said the code is not very pretty right now as well as javadoc and unit tests being pretty much non-existant. So throw some caution to the wind before you consider using this in a production environment.
 
 ### Known limitations:
